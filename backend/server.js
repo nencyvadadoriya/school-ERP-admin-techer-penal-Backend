@@ -27,7 +27,16 @@ const shiftBreakTimeRoutes = require('./routes/shiftBreakTimeRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 
 // Allow the frontend origin from env or reflect the request origin in dev (safe for local development)
-app.use(cors({ origin: process.env.FRONTEND_URL || true, credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
