@@ -26,16 +26,27 @@ const subjectRoutes = require('./routes/subjectRoutes');
 const shiftBreakTimeRoutes = require('./routes/shiftBreakTimeRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 
-// Allow the frontend origin from env or reflect the request origin in dev (safe for local development)
+// Allow multiple origins or use a wildcard for development/production flexibility
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://school-erp-admin-techer-penal-backe.vercel.app'
+].filter(Boolean);
+
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
