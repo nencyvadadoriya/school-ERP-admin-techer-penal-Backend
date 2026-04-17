@@ -12,17 +12,23 @@ if (!uri && process.env.MONGO_USER && process.env.MONGO_PASS && (process.env.MON
   uri = `mongodb+srv://${user}:${pass}@${host}/${dbName}?retryWrites=true&w=majority`;
 }
 
-let isConnected = false;
 const connectDB = async () => {
-  if (isConnected) return;
+  if (!uri) {
+    console.error('❌ MongoDB connection string is not defined.\nPlease create a `.env` file at the project root and set `MONGODB_URI` (see backend/.env.example).');
+    process.exit(1);
+  }
+
   try {
-    const conn = await mongoose.connect(uri);
-    isConnected = true;
+    const conn = await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}`);
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
-    // Don't exit process in serverless
+    process.exit(1);
   }
 };
 

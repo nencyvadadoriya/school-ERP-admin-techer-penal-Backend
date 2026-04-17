@@ -25,29 +25,11 @@ const classRoutes = require('./routes/classRoutes');
 const subjectRoutes = require('./routes/subjectRoutes');
 const shiftBreakTimeRoutes = require('./routes/shiftBreakTimeRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const predictionRoutes = require('./routes/prediction.route');
+const autoNotificationRoutes = require('./routes/autoNotification.route');
 
-// Allow multiple origins or use a wildcard for development/production flexibility
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'https://school-erp-admin-techer-penal-backe.vercel.app'
-].filter(Boolean);
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+// Allow the frontend origin from env or reflect the request origin in dev (safe for local development)
+app.use(cors({ origin: process.env.FRONTEND_URL || true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
@@ -70,10 +52,10 @@ app.use('/api/class', classRoutes);
 app.use('/api/subject', subjectRoutes);
 app.use('/api/shift-break-time', shiftBreakTimeRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/prediction', predictionRoutes);
+app.use('/api/auto-notifications', autoNotificationRoutes);
 
-app.get('/', (req, res) => {
-  res.json({ success: true, message: 'Welcome to School ERP API' });
-});
+
 
 app.get('/health', (req, res) => res.json({ success: true, message: 'School ERP API running', timestamp: new Date() }));
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));
@@ -83,7 +65,5 @@ app.use((error, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => console.log(`🎓 School ERP API running on port ${PORT}`));
-}
+app.listen(PORT, () => console.log(`🎓 School ERP API running on port ${PORT}`));
 module.exports = app;
