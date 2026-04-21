@@ -93,12 +93,19 @@ const studentSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  pushSubscription: {
+    type: Object,
+    default: null
+  },
+  fcmTokens: {
+    type: [String],
+    default: []
+  }
 }, {
   timestamps: true,
 });
 
 // Indexes
-studentSchema.index({ gr_number: 1 });
 studentSchema.index({ class_code: 1 });
 studentSchema.index({ is_delete: 1 });
 studentSchema.index(

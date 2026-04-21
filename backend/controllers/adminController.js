@@ -92,7 +92,7 @@ const verifyOTPAndResetPassword = async (req, res) => {
 // Register Admin
 const registerAdmin = async (req, res) => {
   try {
-    const { first_name, last_name, email, password, phone, pin } = req.body;
+    const { first_name, last_name, email, password, phone, pin, role } = req.body;
 
     // Check if admin already exists
     const existingAdmin = await Admin.findOne({ email, is_delete: false });
@@ -123,11 +123,12 @@ const registerAdmin = async (req, res) => {
       phone,
       pin,
       profile_image: profileImageUrl,
+      role: role || 'admin',
     });
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: admin._id, email: admin.email, role: 'admin' },
+      { id: admin._id, email: admin.email, role: admin.role || 'admin' },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
@@ -187,7 +188,7 @@ const loginAdmin = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: admin._id, email: admin.email, role: 'admin' },
+      { id: admin._id, email: admin.email, role: admin.role || 'admin' },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
@@ -352,6 +353,18 @@ const deleteAdmin = async (req, res) => {
   }
 };
 
+const updateFCMToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const adminId = req.user.id;
+    if (!token) return res.status(400).json({ success: false, message: 'Token is required' });
+    await Admin.findByIdAndUpdate(adminId, { $addToSet: { fcmTokens: token } });
+    res.status(200).json({ success: true, message: 'FCM token updated successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   registerAdmin,
   loginAdmin,
@@ -361,4 +374,5 @@ module.exports = {
   deleteAdmin,
   forgotPassword,
   verifyOTPAndResetPassword,
+  updateFCMToken,
 };

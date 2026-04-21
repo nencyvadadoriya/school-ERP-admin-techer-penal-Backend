@@ -2,21 +2,22 @@ const express = require('express');
 const router = express.Router();
 const {
   registerAdmin, loginAdmin, getAllAdmins, getAdminById, updateAdmin, deleteAdmin,
-  forgotPassword, verifyOTPAndResetPassword,
+  forgotPassword, verifyOTPAndResetPassword, updateFCMToken,
 } = require('../controllers/adminController');
-const { auth, adminAuth } = require('../middleware/auth');
+const { auth, adminAuth, adminOrSubAdminAuth } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 
 // Auth
-router.post('/register', upload.single('profile_image'), registerAdmin);
+router.post('/register', auth, adminOrSubAdminAuth, upload.single('profile_image'), registerAdmin);
 router.post('/login', loginAdmin);
+router.post('/update-fcm-token', auth, updateFCMToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-otp', verifyOTPAndResetPassword);
 
 // Admin CRUD (list)
-router.get('/', auth, adminAuth, getAllAdmins);
+router.get('/', auth, adminOrSubAdminAuth, getAllAdmins);
 
 // ── Classes inline routes ──────────────────────────────────────────────
 router.get('/classes', auth, async (req, res) => {
@@ -71,7 +72,7 @@ router.delete('/subjects/:id', auth, adminAuth, async (req, res) => {
 });
 
 // Admin single-admin routes (place after subresource routes to avoid catching subroutes)
-router.get('/:id', auth, adminAuth, getAdminById);
+router.get('/:id', auth, adminOrSubAdminAuth, getAdminById);
 router.patch('/:id', auth, adminAuth, upload.single('profile_image'), updateAdmin);
 router.delete('/:id', auth, adminAuth, deleteAdmin);
 

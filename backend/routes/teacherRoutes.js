@@ -10,12 +10,14 @@ const {
   assignSubjects,
   forgotPassword,
   verifyOTPAndResetPassword,
+  updateFCMToken,
 } = require('../controllers/teacherController');
 const { auth, adminAuth } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
-// Public routes
+// Auth routes
 router.post('/login', loginTeacher);
+router.post('/update-fcm-token', auth, updateFCMToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-otp', verifyOTPAndResetPassword);
 

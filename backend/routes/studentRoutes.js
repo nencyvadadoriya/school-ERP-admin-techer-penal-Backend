@@ -12,6 +12,7 @@ const {
   changePassword,
   changePin,
   updateProfileImage,
+  updateFCMToken,
 } = require('../controllers/studentController');
 const { auth, adminAuth } = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -20,6 +21,7 @@ const upload = require('../middleware/upload');
 router.post('/login', loginStudent);
 
 // Protected routes (Student/Teacher/Admin)
+router.post('/update-fcm-token', auth, updateFCMToken);
 router.post('/change-password', auth, changePassword);
 router.post('/change-pin', auth, changePin);
 router.post('/profile-image', auth, upload.single('profile_image'), updateProfileImage);

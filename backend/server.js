@@ -4,8 +4,16 @@ const morgan = require('morgan');
 const path = require('path');
 require('dotenv').config();
 
+const http = require('http');
+const { initSocket } = require('./utils/socket');
+const { setupWebPush } = require('./utils/webPush');
+const { setupFirebase } = require('./utils/firebase');
 const connectDB = require('./config/database');
 const app = express();
+const server = http.createServer(app);
+initSocket(server);
+setupWebPush();
+setupFirebase();
 connectDB();
 
 const adminRoutes = require('./routes/adminRoutes');
@@ -58,12 +66,15 @@ app.use('/api/auto-notifications', autoNotificationRoutes);
 
 
 app.get('/health', (req, res) => res.json({ success: true, message: 'School ERP API running', timestamp: new Date() }));
-app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));
+app.use((req, res) => {
+  console.log(`404 - Not Found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.originalUrl}` });
+});
 app.use((error, req, res, next) => {
   console.error('Error:', error);
   res.status(error.status || 500).json({ success: false, message: error.message || 'Internal server error' });
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🎓 School ERP API running on port ${PORT}`));
+server.listen(PORT, () => console.log(`🎓 School ERP API running on port ${PORT}`));
 module.exports = app;

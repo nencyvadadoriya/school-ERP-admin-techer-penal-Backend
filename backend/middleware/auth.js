@@ -40,6 +40,23 @@ const adminAuth = (req, res, next) => {
   }
 };
 
+const adminOrSubAdminAuth = (req, res, next) => {
+  try {
+    if (req.user.role !== 'admin' && req.user.role !== 'sub_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+    next();
+  } catch (error) {
+    res.status(403).json({
+      success: false,
+      message: 'Authorization failed.',
+    });
+  }
+};
+
 const teacherAuth = (req, res, next) => {
   try {
     if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
@@ -57,4 +74,4 @@ const teacherAuth = (req, res, next) => {
   }
 };
 
-module.exports = { auth, adminAuth, teacherAuth };
+module.exports = { auth, adminAuth, adminOrSubAdminAuth, teacherAuth };

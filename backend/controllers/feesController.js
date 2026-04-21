@@ -5,6 +5,12 @@ const { logAudit } = require('../utils/audit');
 const createFee = async (req, res) => {
   try {
     const receipt_number = 'RCP' + Date.now();
+    // Default academic year if not provided
+    if (!req.body.academic_year) {
+      const now = new Date();
+      const year = now.getFullYear();
+      req.body.academic_year = now.getMonth() >= 4 ? `${year}-${(year + 1).toString().slice(-2)}` : `${year - 1}-${year.toString().slice(-2)}`;
+    }
     const fee = await Fees.create({ ...req.body, receipt_number });
 
     await logAudit(req, {

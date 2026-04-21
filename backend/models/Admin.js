@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const adminSchema = new mongoose.Schema({
+  role: {
+    type: String,
+    enum: ['admin', 'sub_admin'],
+    default: 'admin',
+  },
   first_name: {
     type: String,
     required: [true, 'First name is required'],
@@ -47,12 +52,15 @@ const adminSchema = new mongoose.Schema({
   resetPasswordExpires: {
     type: Date,
   },
+  fcmTokens: {
+    type: [String],
+    default: []
+  },
 }, {
   timestamps: true,
 });
 
 // Index for better query performance
-adminSchema.index({ email: 1 });
 adminSchema.index({ is_delete: 1 });
 
 module.exports = mongoose.model('Admin', adminSchema);

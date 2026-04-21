@@ -43,6 +43,11 @@ const getAdminDashboard = async (req, res) => {
 
     const feesCollected = feesDocs.reduce((s, f) => s + (f.amount_paid || 0), 0);
     const feesPending = feesDocs.reduce((s, f) => s + ((f.total_amount || 0) - (f.amount_paid || 0)), 0);
+    const totalFees = feesDocs.reduce((s, f) => s + (f.total_amount || 0), 0);
+    const pendingFeesCount = feesDocs.reduce((c, f) => {
+      const pendingAmt = (f.total_amount || 0) - (f.amount_paid || 0);
+      return c + (pendingAmt > 0 ? 1 : 0);
+    }, 0);
 
     const todayAtt = allAttendance.filter(a => a.date >= today && a.date < tomorrow);
     let present = 0, attTotal = 0;
@@ -98,8 +103,12 @@ const getAdminDashboard = async (req, res) => {
         totalClasses,
         attendancePercentage,
         pendingLeaves: pendingStudentLeaves + pendingTeacherLeaves,
+        pendingStudentLeaves,
+        pendingTeacherLeaves,
         feesCollected,
         feesPending,
+        totalFees,
+        pendingFeesCount,
         charts: {
           weeklyAttendance: last7Days,
           genderDistribution: genderData,

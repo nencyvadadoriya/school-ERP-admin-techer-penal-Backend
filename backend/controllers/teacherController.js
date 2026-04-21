@@ -529,6 +529,18 @@ const assignSubjects = async (req, res) => {
 };
 
 
+const updateFCMToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const teacherId = req.user.id;
+    if (!token) return res.status(400).json({ success: false, message: 'Token is required' });
+    await Teacher.findByIdAndUpdate(teacherId, { $addToSet: { fcmTokens: token } });
+    res.status(200).json({ success: true, message: 'FCM token updated successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   registerTeacher,
   loginTeacher,
@@ -539,5 +551,6 @@ module.exports = {
   assignSubjects,
   forgotPassword,
   verifyOTPAndResetPassword,
+  updateFCMToken,
 };
 
